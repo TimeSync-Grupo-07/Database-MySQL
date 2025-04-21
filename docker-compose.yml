@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  mysql:
+    build: .
+    container_name: mysql-container
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
