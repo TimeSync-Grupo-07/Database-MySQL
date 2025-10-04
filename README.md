@@ -87,7 +87,8 @@ mysql -h 127.0.0.1 -P 3306 -u usuario_app -p
 ├── Dockerfile
 ├── .env-example
 └── init/
-    └── 01-create-schema.sql
+    ├── 01-create-schema.sql
+    └── 02-insert-sample-data.sql
 ```
 
 ## 🛠 Comandos Úteis
