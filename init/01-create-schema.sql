@@ -39,8 +39,8 @@ CREATE TABLE usuarios (
 CREATE TABLE projetos (
     id_projeto CHAR(6) PRIMARY KEY,
     nome_projeto VARCHAR(255) NOT NULL,
-    horas_estimadas_projeto TIME NOT NULL,
-    horas_apontadas_projeto TIME NOT NULL,
+    data_entrega_projeto DATE NOT NULL,
+    data_inicio_projeto DATE NOT NULL,
     id_estado_dado BINARY(16) NOT NULL,
     CONSTRAINT fk_projetos_estado FOREIGN KEY (id_estado_dado) REFERENCES estado_dados(id_estado_dado)
 );
