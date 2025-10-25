@@ -53,7 +53,7 @@ CREATE TABLE apontamentos (
     data_apontamento DATETIME NOT NULL,
     ocorrencia_apontamento VARCHAR(150) NOT NULL,
     justificativa_apontamento VARCHAR(150),
-    id_projeto CHAR(6) NOT NULL,
+    id_projeto CHAR(6),
     hora_inicio_apontamento TIME,
     hora_fim_apontamento TIME,
     horas_totais_apontamento FLOAT,
