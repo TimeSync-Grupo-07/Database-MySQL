@@ -95,55 +95,69 @@ INSERT INTO assoc_usuario_projetos (
 -- Inserir dados na tabela apontamentos
 -- =========================
 
--- João (Gestor) - Projetos PROJ01 e PROJ02
 INSERT INTO apontamentos (
     id_apontamento, data_apontamento, ocorrencia_apontamento, justificativa_apontamento,
     id_projeto, hora_inicio_apontamento, hora_fim_apontamento, horas_totais_apontamento,
     motivo_apontamento, usuarios_matricula, id_estado_dado
 ) VALUES
--- PROJ01
-(UUID_TO_BIN(UUID()), '2024-02-01 09:00:00', 'Reunião inicial do projeto', 'Definição de escopo', 'PROJ01', '09:00:00', '11:00:00', '02:00:00', 'Planejamento', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2024-02-02 14:00:00', 'Acompanhamento equipe', 'Verificação de progresso', 'PROJ01', '14:00:00', '16:00:00', '02:00:00', 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2024-02-03 09:00:00', 'Aprovação de entregas', 'Validação sprint 1', 'PROJ01', '09:00:00', '10:30:00', '01:30:00', 'Revisão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2024-02-04 13:00:00', 'Reunião com cliente', 'Apresentação parcial', 'PROJ01', '13:00:00', '15:00:00', '02:00:00', 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2024-02-05 10:00:00', 'Planejamento de sprint 2', 'Priorização backlog', 'PROJ01', '10:00:00', '12:00:00', '02:00:00', 'Planejamento', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
--- PROJ02
-(UUID_TO_BIN(UUID()), '2024-02-06 09:00:00', 'Reunião inicial PROJ02', 'Apresentação da equipe', 'PROJ02', '09:00:00', '10:30:00', '01:30:00', 'Planejamento', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2024-02-07 14:00:00', 'Acompanhamento sprint', 'Análise de progresso', 'PROJ02', '14:00:00', '16:00:00', '02:00:00', 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2024-02-08 09:00:00', 'Aprovação de layout', 'Validação do front-end', 'PROJ02', '09:00:00', '11:00:00', '02:00:00', 'Revisão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2024-02-09 10:00:00', 'Reunião cliente', 'Coleta de feedback', 'PROJ02', '10:00:00', '12:00:00', '02:00:00', 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2024-02-10 13:00:00', 'Planejamento sprint 2', 'Definição de metas', 'PROJ02', '13:00:00', '15:00:00', '02:00:00', 'Planejamento', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1));
+-- PROJ01 - Usuario 1001 com MAIS horas (dias completos)
+(UUID_TO_BIN(UUID()), '2024-02-01 08:00:00', 'Reunião inicial do projeto', 'Definição de escopo', 'PROJ01', '08:00:00', '12:00:00', NULL, 'Planejamento', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-01 13:00:00', 'Análise de requisitos', 'Documentação técnica', 'PROJ01', '13:00:00', '18:00:00', NULL, 'Análise', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-02 08:00:00', 'Acompanhamento equipe', 'Verificação de progresso', 'PROJ01', '08:00:00', '12:00:00', NULL, 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-02 13:00:00', 'Revisão de métricas', 'Análise de KPIs', 'PROJ01', '13:00:00', '18:00:00', NULL, 'Análise', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-03 08:00:00', 'Aprovação de entregas', 'Validação sprint 1', 'PROJ01', '08:00:00', '12:00:00', NULL, 'Revisão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-03 13:00:00', 'Planejamento sprint 2', 'Priorização backlog', 'PROJ01', '13:00:00', '18:00:00', NULL, 'Planejamento', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-04 08:00:00', 'Reunião com cliente', 'Apresentação parcial', 'PROJ01', '08:00:00', '12:00:00', NULL, 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-04 13:00:00', 'Follow-up ações', 'Definição de próximos passos', 'PROJ01', '13:00:00', '18:00:00', NULL, 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-05 08:00:00', 'Análise de riscos', 'Identificação de blockers', 'PROJ01', '08:00:00', '12:00:00', NULL, 'Análise', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-05 13:00:00', 'Report de status', 'Relatório para diretoria', 'PROJ01', '13:00:00', '18:00:00', NULL, 'Documentação', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
 
--- Maria (Senior) - PROJ01 e PROJ02
+-- PROJ02 - Usuario 1001 com MENOS horas (apenas reuniões curtas)
+(UUID_TO_BIN(UUID()), '2024-02-06 09:00:00', 'Reunião inicial PROJ02', 'Apresentação da equipe', 'PROJ02', '09:00:00', '10:00:00', NULL, 'Planejamento', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-07 14:00:00', 'Acompanhamento sprint', 'Análise de progresso', 'PROJ02', '14:00:00', '15:00:00', NULL, 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-08 09:00:00', 'Aprovação de layout', 'Validação do front-end', 'PROJ02', '09:00:00', '10:00:00', NULL, 'Revisão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-09 10:00:00', 'Reunião cliente', 'Coleta de feedback', 'PROJ02', '10:00:00', '11:00:00', NULL, 'Gestão', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2024-02-10 13:00:00', 'Planejamento sprint 2', 'Definição de metas', 'PROJ02', '13:00:00', '14:00:00', NULL, 'Planejamento', 1001, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1));
+
+-- Maria (1002) - PROJ01 com MENOS horas
 INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-01 09:00:00', 'Implementação API usuários', 'CRUD de usuários', 'PROJ01', '09:00:00', '12:00:00', '03:00:00', 'Desenvolvimento', 1002, id_estado_dado 
+SELECT UUID_TO_BIN(UUID()), '2024-02-01 09:00:00', 'Implementação API usuários', 'CRUD de usuários', 'PROJ01', '09:00:00', '11:00:00', NULL, 'Desenvolvimento', 1002, id_estado_dado 
 FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
 INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-02 13:00:00', 'Correção bugs sprint 1', 'Ajuste de autenticação', 'PROJ01', '13:00:00', '16:00:00', '03:00:00', 'Correção', 1002, id_estado_dado 
+SELECT UUID_TO_BIN(UUID()), '2024-02-02 13:00:00', 'Correção bugs sprint 1', 'Ajuste de autenticação', 'PROJ01', '13:00:00', '15:00:00', NULL, 'Correção', 1002, id_estado_dado 
 FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
 INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-03 09:00:00', 'Revisão de código', 'Code review PR #42', 'PROJ01', '09:00:00', '11:00:00', '02:00:00', 'Revisão', 1002, id_estado_dado 
-FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
-INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-04 10:00:00', 'Integração CI/CD', 'Pipeline Jenkins', 'PROJ01', '10:00:00', '12:30:00', '02:30:00', 'Configuração', 1002, id_estado_dado 
-FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
-INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-05 14:00:00', 'Documentação técnica', 'Endpoints REST', 'PROJ01', '14:00:00', '16:00:00', '02:00:00', 'Documentação', 1002, id_estado_dado 
+SELECT UUID_TO_BIN(UUID()), '2024-02-03 09:00:00', 'Revisão de código', 'Code review PR #42', 'PROJ01', '09:00:00', '10:30:00', NULL, 'Revisão', 1002, id_estado_dado 
 FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
 
--- Maria - PROJ02
+-- Maria (1002) - PROJ02 com MAIS horas (dias completos)
 INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-06 09:00:00', 'Modelagem do banco', 'Criação de tabelas principais', 'PROJ02', '09:00:00', '12:00:00', '03:00:00', 'Desenvolvimento', 1002, id_estado_dado 
+SELECT UUID_TO_BIN(UUID()), '2024-02-06 08:00:00', 'Modelagem do banco', 'Criação de tabelas principais', 'PROJ02', '08:00:00', '12:00:00', NULL, 'Desenvolvimento', 1002, id_estado_dado 
 FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
 INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-07 13:00:00', 'Testes unitários', 'Cobertura 75%', 'PROJ02', '13:00:00', '16:00:00', '03:00:00', 'Testes', 1002, id_estado_dado 
+SELECT UUID_TO_BIN(UUID()), '2024-02-06 13:00:00', 'Implementação entidades', 'Classes de domínio', 'PROJ02', '13:00:00', '18:00:00', NULL, 'Desenvolvimento', 1002, id_estado_dado 
 FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
 INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-08 09:00:00', 'Refatoração código', 'Melhoria de performance', 'PROJ02', '09:00:00', '11:30:00', '02:30:00', 'Refatoração', 1002, id_estado_dado 
+SELECT UUID_TO_BIN(UUID()), '2024-02-07 08:00:00', 'Testes unitários', 'Cobertura 75%', 'PROJ02', '08:00:00', '12:00:00', NULL, 'Testes', 1002, id_estado_dado 
 FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
 INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-09 10:00:00', 'Revisão peer code', 'Feedback entre devs', 'PROJ02', '10:00:00', '12:00:00', '02:00:00', 'Revisão', 1002, id_estado_dado 
+SELECT UUID_TO_BIN(UUID()), '2024-02-07 13:00:00', 'Integração contínua', 'Configuração pipeline', 'PROJ02', '13:00:00', '18:00:00', NULL, 'Configuração', 1002, id_estado_dado 
 FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
 INSERT INTO apontamentos
-SELECT UUID_TO_BIN(UUID()), '2024-02-10 13:00:00', 'Deploy teste', 'Ambiente staging', 'PROJ02', '13:00:00', '15:00:00', '02:00:00', 'Deploy', 1002, id_estado_dado 
+SELECT UUID_TO_BIN(UUID()), '2024-02-08 08:00:00', 'Refatoração código', 'Melhoria de performance', 'PROJ02', '08:00:00', '12:00:00', NULL, 'Refatoração', 1002, id_estado_dado 
+FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
+INSERT INTO apontamentos
+SELECT UUID_TO_BIN(UUID()), '2024-02-08 13:00:00', 'Otimização queries', 'Análise de performance', 'PROJ02', '13:00:00', '18:00:00', NULL, 'Otimização', 1002, id_estado_dado 
+FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
+INSERT INTO apontamentos
+SELECT UUID_TO_BIN(UUID()), '2024-02-09 08:00:00', 'Revisão peer code', 'Feedback entre devs', 'PROJ02', '08:00:00', '12:00:00', NULL, 'Revisão', 1002, id_estado_dado 
+FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
+INSERT INTO apontamentos
+SELECT UUID_TO_BIN(UUID()), '2024-02-09 13:00:00', 'Documentação técnica', 'API endpoints', 'PROJ02', '13:00:00', '18:00:00', NULL, 'Documentação', 1002, id_estado_dado 
+FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
+INSERT INTO apontamentos
+SELECT UUID_TO_BIN(UUID()), '2024-02-10 08:00:00', 'Deploy teste', 'Ambiente staging', 'PROJ02', '08:00:00', '12:00:00', NULL, 'Deploy', 1002, id_estado_dado 
+FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;
+INSERT INTO apontamentos
+SELECT UUID_TO_BIN(UUID()), '2024-02-10 13:00:00', 'Monitoramento produção', 'Análise de logs', 'PROJ02', '13:00:00', '18:00:00', NULL, 'Monitoramento', 1002, id_estado_dado 
 FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1;

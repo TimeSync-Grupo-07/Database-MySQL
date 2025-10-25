@@ -104,6 +104,19 @@ LEFT JOIN assoc_cargo_equipe ace
     ON ace.usuarios_matricula = u.matricula
 GROUP BY p.id_projeto, p.nome_projeto;
 
+SELECT 
+    p.id_projeto,
+    p.nome_projeto,
+    SUM(a.horas_totais_apontamento * ace.valor_hora) AS custo_real_laboral
+FROM apontamentos a
+LEFT JOIN projetos p 
+    ON CAST(p.id_projeto AS CHAR) = CAST(a.id_projeto AS CHAR)
+LEFT JOIN usuarios u 
+    ON a.usuarios_matricula = u.matricula
+LEFT JOIN assoc_cargo_equipe ace 
+    ON ace.usuarios_matricula = u.matricula
+GROUP BY p.id_projeto, p.nome_projeto;
+
 -- View Prazo de entrega
 CREATE OR REPLACE VIEW vw_prazo_entrega_projeto AS
 SELECT 
