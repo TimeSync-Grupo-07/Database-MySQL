@@ -127,11 +127,11 @@ INSERT INTO apontamentos (
 (UUID_TO_BIN(UUID()), '2025-08-05', 'Relógio Web', NULL, NULL, '13:00:00', '19:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
 (UUID_TO_BIN(UUID()), '2025-08-05', 'Hora extra', '14 - Hora extra', NULL, NULL, NULL, 2, 'Hora extra justificada', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
 (UUID_TO_BIN(UUID()), '2025-08-05', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL,8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2025-08-05', 'Horas Projeto Extra', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 2, 'Horas extras projeto', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-05', 'Horas Projeto Extra', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 2, 'Hora extra', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
 
 -- 06/08/2025 - Com marcação manual
 (UUID_TO_BIN(UUID()), '2025-08-06', 'Relógio Web', NULL, NULL, '08:00:00', '12:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2025-08-06', 'Marcação Manual', NULL, NULL, '13:00:00', '17:00:00', NULL, '01-Esquecimento', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-06', 'Marcação Manual', NULL, NULL, '13:00:00', '17:00:00', NULL, 'Retroativo', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
 (UUID_TO_BIN(UUID()), '2025-08-06', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
 
 -- Dias 07-15/08/2025 - Padrão normal

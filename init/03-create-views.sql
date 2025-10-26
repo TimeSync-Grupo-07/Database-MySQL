@@ -162,7 +162,7 @@ LEFT JOIN projetos p
 GROUP BY p.id_projeto, p.nome_projeto;
 
 -- [TESTE] View Horas Apontadas
-SELECT * FROM vw_horas_apontadas WHERE id_projeto = 'PROJ01';
+SELECT * FROM Timesync.vw_horas_apontadas WHERE id_projeto = 'PROJ01';
 
 -- View Horas Extras Totais
 CREATE OR REPLACE VIEW vw_horas_extras_totais AS
