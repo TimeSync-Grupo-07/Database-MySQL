@@ -39,8 +39,8 @@ CREATE TABLE usuarios (
 CREATE TABLE projetos (
     id_projeto CHAR(6) PRIMARY KEY,
     nome_projeto VARCHAR(255) NOT NULL,
-    horas_estimadas_projeto TIME NOT NULL,
-    horas_apontadas_projeto TIME NOT NULL,
+    data_entrega_projeto DATE NOT NULL,
+    data_inicio_projeto DATE NOT NULL,
     id_estado_dado BINARY(16) NOT NULL,
     CONSTRAINT fk_projetos_estado FOREIGN KEY (id_estado_dado) REFERENCES estado_dados(id_estado_dado)
 );
@@ -53,10 +53,10 @@ CREATE TABLE apontamentos (
     data_apontamento DATETIME NOT NULL,
     ocorrencia_apontamento VARCHAR(150) NOT NULL,
     justificativa_apontamento VARCHAR(150),
-    id_projeto CHAR(6) NOT NULL,
+    id_projeto CHAR(6),
     hora_inicio_apontamento TIME,
     hora_fim_apontamento TIME,
-    horas_totais_apontamento TIME NOT NULL,
+    horas_totais_apontamento FLOAT,
     motivo_apontamento VARCHAR(150),
     usuarios_matricula INT NOT NULL,
     id_estado_dado BINARY(16) NOT NULL,
@@ -101,3 +101,14 @@ CREATE TABLE assoc_cargo_equipe (
     CONSTRAINT fk_assoc_cargo_equipe FOREIGN KEY (equipe_id_equipe) REFERENCES equipe(id_equipe),
     CONSTRAINT fk_assoc_cargo FOREIGN KEY (cargo_usuario_id_cargo_usuario) REFERENCES cargo_usuario(id_cargo_usuario)
 );
+
+DELIMITER //
+CREATE TRIGGER calcular_horas_apontamento
+BEFORE INSERT ON apontamentos
+FOR EACH ROW
+BEGIN
+    IF NEW.horas_totais_apontamento IS NULL THEN
+        SET NEW.horas_totais_apontamento = TIME_TO_SEC(TIMEDIFF(NEW.hora_fim_apontamento, NEW.hora_inicio_apontamento)) / 3600;
+    END IF;
+END //
+DELIMITER ;

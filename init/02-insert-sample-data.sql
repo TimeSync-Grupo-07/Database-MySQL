@@ -1,5 +1,3 @@
--- init/02-insert-sample-data.sql
-
 USE Timesync;
 
 -- =========================
@@ -15,101 +13,128 @@ INSERT INTO estado_dados (id_estado_dado, nome_estado_dado) VALUES
 -- Inserir dados na tabela cargo_usuario
 -- =========================
 INSERT INTO cargo_usuario (id_cargo_usuario, titulo_cargo_usuario) VALUES
-(UUID_TO_BIN(UUID()), 'Desenvolvedor Junior'),
-(UUID_TO_BIN(UUID()), 'Desenvolvedor Pleno'),
-(UUID_TO_BIN(UUID()), 'Desenvolvedor Senior'),
+(UUID_TO_BIN(UUID()), 'Desenvolvedor RPA'),
+(UUID_TO_BIN(UUID()), 'Analista de Processos'),
+(UUID_TO_BIN(UUID()), 'Coordenador de Projetos'),
 (UUID_TO_BIN(UUID()), 'Gerente de Projetos'),
-(UUID_TO_BIN(UUID()), 'Analista de Sistemas');
+(UUID_TO_BIN(UUID()), 'Especialista em Automação');
 
 -- =========================
--- Inserir dados na tabela usuarios
+-- Inserir dados na tabela usuarios (baseado no documento)
 -- =========================
-INSERT INTO usuarios (matricula, nome_completo_usuario, email_usuario, id_microsoft_usuario, data_criacao_usuario, data_atualizacao_usuario, id_estado_dado, matricula_superior) VALUES
-(1001, 'João Silva', 'joao.silva@empresa.com', 'joao.silva_empresa.com#EXT#', NOW(), NOW(), 
+INSERT INTO usuarios (
+    matricula, nome_completo_usuario, email_usuario, id_microsoft_usuario, 
+    data_criacao_usuario, data_atualizacao_usuario, id_estado_dado, matricula_superior
+) VALUES
+(509880, 'Giovanna AAvila', 'giovanna.aavila@empresa.com', 'giovanna.aavila_empresa.com#EXT#', NOW(), NOW(), 
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), NULL),
- 
-(1002, 'Maria Santos', 'maria.santos@empresa.com', 'maria.santos_empresa.com#EXT#', NOW(), NOW(), 
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 1001),
- 
-(1003, 'Pedro Oliveira', 'pedro.oliveira@empresa.com', 'pedro.oliveira_empresa.com#EXT#', NOW(), NOW(), 
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 1001),
- 
-(1004, 'Ana Costa', 'ana.costa@empresa.com', 'ana.costa_empresa.com#EXT#', NOW(), NOW(), 
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 1002);
+(509881, 'Carlos Silva', 'carlos.silva@empresa.com', 'carlos.silva_empresa.com#EXT#', NOW(), NOW(), 
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 509880),
+(509882, 'Ana Rodrigues', 'ana.rodrigues@empresa.com', 'ana.rodrigues_empresa.com#EXT#', NOW(), NOW(), 
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 509880),
+(509883, 'Pedro Santos', 'pedro.santos@empresa.com', 'pedro.santos_empresa.com#EXT#', NOW(), NOW(), 
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 509880),
+(509884, 'Mariana Lima', 'mariana.lima@empresa.com', 'mariana.lima_empresa.com#EXT#', NOW(), NOW(), 
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 509880);
 
 -- =========================
--- Inserir dados na tabela projetos
+-- Inserir dados na tabela projetos (baseado no documento)
 -- =========================
-INSERT INTO projetos (id_projeto, nome_projeto, horas_estimadas_projeto, horas_apontadas_projeto, id_estado_dado) VALUES
-('PROJ01', 'Sistema de Gestão Interna', '200:00:00', '45:30:00',
+INSERT INTO projetos (
+    id_projeto, nome_projeto, data_entrega_projeto, data_inicio_projeto, 
+    id_estado_dado
+) VALUES
+('PC.037', 'ITAU - PROJETOS RPA', '2025-12-30', '2025-08-01',
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1)),
- 
-('PROJ02', 'Portal do Cliente', '150:00:00', '80:15:00',
+('PC.038', 'BRADESCO - PROCESS MINING', '2025-11-15', '2025-08-01',
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1)),
- 
-('PROJ03', 'Aplicativo Mobile', '300:00:00', '120:45:00',
+('PC.039', 'SANTANDER - AUTOMAÇÃO', '2025-10-30', '2025-08-01',
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1)),
- 
-('PROJ04', 'Migração de Dados', '100:00:00', '25:20:00',
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Concluído' LIMIT 1));
+('PC.040', 'BANCO DO BRASIL - BOTs', '2025-09-20', '2025-08-01',
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1));
 
 -- =========================
 -- Inserir dados na tabela equipe
 -- =========================
 INSERT INTO equipe (id_equipe, usuarios_matricula) VALUES
-(UUID_TO_BIN(UUID()), 1001),
-(UUID_TO_BIN(UUID()), 1002),
-(UUID_TO_BIN(UUID()), 1003),
-(UUID_TO_BIN(UUID()), 1004);
+(UUID_TO_BIN(UUID()), 509880);
 
 -- =========================
 -- Inserir dados na tabela assoc_cargo_equipe
 -- =========================
-INSERT INTO assoc_cargo_equipe (id_assoc_cargo_equipe, usuarios_matricula, equipe_id_equipe, cargo_usuario_id_cargo_usuario, valor_hora) VALUES
-(UUID_TO_BIN(UUID()), 1001, 
- (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 1001),
- (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Gerente de Projetos'), 150.00),
- 
-(UUID_TO_BIN(UUID()), 1002, 
- (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 1002),
- (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Desenvolvedor Senior'), 120.00),
- 
-(UUID_TO_BIN(UUID()), 1003, 
- (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 1003),
- (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Desenvolvedor Pleno'), 90.00),
- 
-(UUID_TO_BIN(UUID()), 1004, 
- (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 1004),
- (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Desenvolvedor Junior'), 65.00);
+INSERT INTO assoc_cargo_equipe (
+    id_assoc_cargo_equipe, usuarios_matricula, equipe_id_equipe, 
+    cargo_usuario_id_cargo_usuario, valor_hora
+) VALUES
+(UUID_TO_BIN(UUID()), 509880, (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 509880),
+ (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Especialista em Automação'), 150.00),
+(UUID_TO_BIN(UUID()), 509881, (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 509880),
+ (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Desenvolvedor RPA'), 120.00),
+(UUID_TO_BIN(UUID()), 509882, (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 509880),
+ (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Analista de Processos'), 100.00),
+(UUID_TO_BIN(UUID()), 509883, (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 509880),
+ (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Desenvolvedor RPA'), 110.00),
+(UUID_TO_BIN(UUID()), 509884, (SELECT id_equipe FROM equipe WHERE usuarios_matricula = 509880),
+ (SELECT id_cargo_usuario FROM cargo_usuario WHERE titulo_cargo_usuario = 'Coordenador de Projetos'), 130.00);
 
 -- =========================
 -- Inserir dados na tabela assoc_usuario_projetos
 -- =========================
-INSERT INTO assoc_usuario_projetos (id_assoc_usuarios_projetos, usuarios_matricula, id_projeto, data_criacao_associacao, horas_planejadas, data_atualizacao_associacao) VALUES
-(UUID_TO_BIN(UUID()), 1001, 'PROJ01', NOW(), 40, NOW()),
-(UUID_TO_BIN(UUID()), 1001, 'PROJ02', NOW(), 30, NOW()),
-(UUID_TO_BIN(UUID()), 1002, 'PROJ01', NOW(), 60, NOW()),
-(UUID_TO_BIN(UUID()), 1002, 'PROJ03', NOW(), 80, NOW()),
-(UUID_TO_BIN(UUID()), 1003, 'PROJ02', NOW(), 50, NOW()),
-(UUID_TO_BIN(UUID()), 1003, 'PROJ03', NOW(), 70, NOW()),
-(UUID_TO_BIN(UUID()), 1004, 'PROJ01', NOW(), 40, NOW()),
-(UUID_TO_BIN(UUID()), 1004, 'PROJ04', NOW(), 20, NOW());
+INSERT INTO assoc_usuario_projetos (
+    id_assoc_usuarios_projetos, usuarios_matricula, id_projeto, 
+    data_criacao_associacao, horas_planejadas, data_atualizacao_associacao
+) VALUES
+-- Giovanna nos projetos principais
+(UUID_TO_BIN(UUID()), 509880, 'PC.037', '2025-08-01', 160, NOW()),
+(UUID_TO_BIN(UUID()), 509880, 'PC.038', '2025-08-01', 160, NOW()),
+-- Outros colaboradores distribuídos
+(UUID_TO_BIN(UUID()), 509881, 'PC.037', '2025-08-01', 120, NOW()),
+(UUID_TO_BIN(UUID()), 509881, 'PC.038', '2025-08-01', 120, NOW()),
+(UUID_TO_BIN(UUID()), 509882, 'PC.038', '2025-08-01', 140, NOW()),
+(UUID_TO_BIN(UUID()), 509882, 'PC.039', '2025-08-01', 100, NOW()),
+(UUID_TO_BIN(UUID()), 509883, 'PC.037', '2025-08-01', 130, NOW()),
+(UUID_TO_BIN(UUID()), 509883, 'PC.040', '2025-08-01', 110, NOW()),
+(UUID_TO_BIN(UUID()), 509884, 'PC.038', '2025-08-01', 150, NOW()),
+(UUID_TO_BIN(UUID()), 509884, 'PC.039', '2025-08-01', 90, NOW());
 
 -- =========================
--- Inserir dados na tabela apontamentos
+-- Inserir dados na tabela apontamentos (baseado no documento real)
 -- =========================
-INSERT INTO apontamentos (id_apontamento, data_apontamento, ocorrencia_apontamento, justificativa_apontamento, id_projeto, hora_inicio_apontamento, hora_fim_apontamento, horas_totais_apontamento, motivo_apontamento, usuarios_matricula, id_estado_dado) VALUES
-(UUID_TO_BIN(UUID()), '2024-01-15 09:00:00', 'Desenvolvimento módulo usuários', 'Implementação CRUD completo', 'PROJ01', '09:00:00', '12:00:00', '03:00:00', 'Desenvolvimento', 1001,
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1)),
- 
-(UUID_TO_BIN(UUID()), '2024-01-15 14:00:00', 'Revisão de código', 'Revisão PR #123', 'PROJ01', '14:00:00', '15:30:00', '01:30:00', 'Revisão', 1002,
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1)),
- 
-(UUID_TO_BIN(UUID()), '2024-01-16 10:00:00', 'Configuração ambiente', 'Setup docker e banco', 'PROJ02', '10:00:00', '12:30:00', '02:30:00', 'Configuração', 1003,
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1)),
- 
-(UUID_TO_BIN(UUID()), '2024-01-16 13:00:00', 'Testes unitários', 'Cobertura 80% módulo auth', 'PROJ03', '13:00:00', '17:00:00', '04:00:00', 'Testes', 1004,
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1)),
- 
-(UUID_TO_BIN(UUID()), '2024-01-17 08:30:00', 'Reunião de planejamento', 'Sprint planning semana 3', 'PROJ01', '08:30:00', '10:00:00', '01:30:00', 'Reunião', 1001,
- (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1));
+
+-- Agosto 2025 - Baseado no espelho de ponto da Giovanna
+INSERT INTO apontamentos (
+    id_apontamento, data_apontamento, ocorrencia_apontamento, justificativa_apontamento,
+    id_projeto, hora_inicio_apontamento, hora_fim_apontamento, horas_totais_apontamento,
+    motivo_apontamento, usuarios_matricula, id_estado_dado
+) VALUES
+-- 01/08/2025 - Dia completo
+(UUID_TO_BIN(UUID()), '2025-08-01', 'Relógio Web', NULL, 'PC.037', '07:00:00', '12:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-01', 'Relógio Web', NULL, 'PC.037', '13:00:00', '16:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-01', 'Horas Projeto', 'ITAU - PROJETOS RPA', 'PC.037', NULL, NULL, 8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-01', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 02-03/08/2025 - Finais de semana compensados
+(UUID_TO_BIN(UUID()), '2025-08-02', 'Compensado', NULL, NULL, NULL, NULL, 0, 'Folga', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-03', 'Compensado', NULL, NULL, NULL, NULL, 0, 'Folga', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 04/08/2025 - Com marcação manual
+(UUID_TO_BIN(UUID()), '2025-08-04', 'Marcação Manual', NULL, NULL, '08:00:00', '12:00:00', NULL, '01-Esquecimento', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-04', 'Relógio Web', NULL, NULL, '13:00:00', '17:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-04', 'Horas Programadas', 'BRADESCO - PROCESS MINING', NULL, NULL, NULL, 8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 05/08/2025 - Com hora extra
+(UUID_TO_BIN(UUID()), '2025-08-05', 'Relógio Web', NULL, NULL, '08:00:00', '12:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-05', 'Relógio Web', NULL, NULL, '13:00:00', '19:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-05', 'Hora extra', '14 - Hora extra', NULL, NULL, NULL, 2, 'Hora extra justificada', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-05', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL,8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-05', 'Horas Projeto Extra', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 2, 'Hora extra', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 06/08/2025 - Com marcação manual
+(UUID_TO_BIN(UUID()), '2025-08-06', 'Relógio Web', NULL, NULL, '08:00:00', '12:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-06', 'Marcação Manual', NULL, NULL, '13:00:00', '17:00:00', NULL, 'Retroativo', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-06', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- Dias 07-15/08/2025 - Padrão normal
+(UUID_TO_BIN(UUID()), '2025-08-07', 'Relógio Web', NULL, NULL, '08:00:00', '12:22:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-07', 'Relógio Web', NULL, NULL, '13:22:00', '17:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-07', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1));
