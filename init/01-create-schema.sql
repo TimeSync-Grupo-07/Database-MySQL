@@ -23,8 +23,9 @@ CREATE TABLE cargo_usuario (
 CREATE TABLE usuarios (
     matricula INT PRIMARY KEY,
     nome_completo_usuario VARCHAR(100) NOT NULL,
-    email_usuario VARCHAR(150) NOT NULL,
-    id_microsoft_usuario VARCHAR(255),
+    -- Dados sensíveis criptografados
+    email_usuario_criptografado VARBINARY(255) NOT NULL,
+    id_microsoft_usuario_criptografado VARBINARY(255),
     data_criacao_usuario DATETIME NOT NULL,
     data_atualizacao_usuario DATETIME NOT NULL,
     id_estado_dado BINARY(16) NOT NULL,
@@ -96,7 +97,8 @@ CREATE TABLE assoc_cargo_equipe (
     usuarios_matricula INT NOT NULL,
     equipe_id_equipe BINARY(16) NOT NULL,
     cargo_usuario_id_cargo_usuario BINARY(16) NOT NULL,
-    valor_hora FLOAT NOT NULL,
+    -- Valor hora criptografado
+    valor_hora_criptografado VARBINARY(255) NOT NULL,
     CONSTRAINT fk_assoc_cargo_usuario FOREIGN KEY (usuarios_matricula) REFERENCES usuarios(matricula),
     CONSTRAINT fk_assoc_cargo_equipe FOREIGN KEY (equipe_id_equipe) REFERENCES equipe(id_equipe),
     CONSTRAINT fk_assoc_cargo FOREIGN KEY (cargo_usuario_id_cargo_usuario) REFERENCES cargo_usuario(id_cargo_usuario)

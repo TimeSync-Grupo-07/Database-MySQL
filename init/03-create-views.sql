@@ -1,234 +1,210 @@
--- init/03-create-views.sql
 USE Timesync;
 
--- View de Exemplo
-CREATE OR REPLACE VIEW nome_funcionario__nome_superior AS
+-- =========================
+-- View: vw_usuarios_completos
+-- =========================
+CREATE OR REPLACE VIEW vw_usuarios_completos AS
 SELECT 
-    u.nome_completo_usuario AS nome_funcionario,
-    s.nome_completo_usuario AS nome_superior
+    u.matricula,
+    u.nome_completo_usuario,
+    CAST(AES_DECRYPT(u.email_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as email_usuario,
+    CAST(AES_DECRYPT(u.id_microsoft_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as id_microsoft_usuario,
+    u.data_criacao_usuario,
+    u.data_atualizacao_usuario,
+    ed.nome_estado_dado as estado_usuario,
+    u.matricula_superior,
+    sup.nome_completo_usuario as nome_superior
 FROM usuarios u
-LEFT JOIN usuarios s ON s.matricula = u.matricula_superior;
+LEFT JOIN estado_dados ed ON u.id_estado_dado = ed.id_estado_dado
+LEFT JOIN usuarios sup ON u.matricula_superior = sup.matricula;
 
--- Tela de Projetos
--- View de Distribuição de esforço entre colaboradores por projeto
-CREATE OR REPLACE VIEW vw_distribuicao_esforco AS
+-- =========================
+-- View: vw_colaboradores_equipe
+-- =========================
+CREATE OR REPLACE VIEW vw_colaboradores_equipe AS
+SELECT 
+    ace.id_assoc_cargo_equipe,
+    u.matricula,
+    u.nome_completo_usuario,
+    CAST(AES_DECRYPT(u.email_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as email_usuario,
+    cu.titulo_cargo_usuario,
+    CAST(AES_DECRYPT(ace.valor_hora_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as valor_hora,
+    e.id_equipe
+FROM assoc_cargo_equipe ace
+JOIN usuarios u ON ace.usuarios_matricula = u.matricula
+JOIN cargo_usuario cu ON ace.cargo_usuario_id_cargo_usuario = cu.id_cargo_usuario
+JOIN equipe e ON ace.equipe_id_equipe = e.id_equipe;
+
+-- =========================
+-- View: vw_projetos_ativos
+-- =========================
+CREATE OR REPLACE VIEW vw_projetos_ativos AS
 SELECT 
     p.id_projeto,
     p.nome_projeto,
-    u.matricula,
-    u.nome_completo_usuario AS nome_colaborador,
-    aup.horas_planejadas,
-    ROUND((aup.horas_planejadas / SUM(aup.horas_planejadas)
-           OVER (PARTITION BY p.id_projeto)) * 100, 2) AS percentual_esforco
-FROM assoc_usuario_projetos aup
-LEFT JOIN usuarios u ON CAST(u.matricula AS CHAR) = CAST(aup.usuarios_matricula AS CHAR)
-LEFT JOIN projetos p ON CAST(p.id_projeto AS CHAR) = CAST(aup.id_projeto AS CHAR);
-    
--- [TESTE] View de Distribuição de esforço entre colaboradores por projeto
-SELECT * FROM vw_distribuicao_esforco;
+    p.data_inicio_projeto,
+    p.data_entrega_projeto,
+    ed.nome_estado_dado as estado_projeto
+FROM projetos p
+JOIN estado_dados ed ON p.id_estado_dado = ed.id_estado_dado
+WHERE ed.nome_estado_dado = 'Ativo';
 
--- View tabela de colaboradores por projeto
-CREATE OR REPLACE VIEW vw_indicadores_jornada AS
+-- =========================
+-- View: vw_alocacao_projetos
+-- =========================
+CREATE OR REPLACE VIEW vw_alocacao_projetos AS
 SELECT 
+    aup.id_assoc_usuarios_projetos,
+    u.matricula,
+    u.nome_completo_usuario,
+    CAST(AES_DECRYPT(u.email_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as email_usuario,
     p.id_projeto,
     p.nome_projeto,
-    u.matricula,
-    u.nome_completo_usuario AS nome_colaborador,
     aup.horas_planejadas,
-
-    SUM(a.horas_totais_apontamento) AS horas_apontadas,
-
-    SUM(CASE WHEN a.motivo_apontamento = 'Hora Extra' THEN a.horas_totais_apontamento ELSE 0 END) AS horas_extras,
-    SUM(CASE WHEN a.motivo_apontamento = 'Retroativo' THEN a.horas_totais_apontamento ELSE 0 END) AS horas_retroativas,
-
-    ROUND((SUM(a.horas_totais_apontamento) / aup.horas_planejadas) * 100, 2) AS indice_cumprimento,
-    ROUND((SUM(CASE WHEN a.motivo_apontamento = 'Hora Extra' THEN a.horas_totais_apontamento ELSE 0 END) / aup.horas_planejadas) * 100, 2) AS indice_excedente,
-    ROUND((SUM(CASE WHEN a.motivo_apontamento = 'Retroativo' THEN a.horas_totais_apontamento ELSE 0 END) / NULLIF(SUM(a.horas_totais_apontamento), 0)) * 100, 2) AS taxa_erro_apontamento
-
+    aup.data_criacao_associacao,
+    aup.data_atualizacao_associacao
 FROM assoc_usuario_projetos aup
-LEFT JOIN usuarios u ON CAST(u.matricula AS CHAR) = CAST(aup.usuarios_matricula AS CHAR)
-LEFT JOIN projetos p ON CAST(p.id_projeto AS CHAR) = CAST(aup.id_projeto AS CHAR)
-LEFT JOIN apontamentos a ON a.usuarios_matricula = u.matricula AND a.id_projeto = p.id_projeto
+JOIN usuarios u ON aup.usuarios_matricula = u.matricula
+JOIN projetos p ON aup.id_projeto = p.id_projeto;
 
-GROUP BY 
+-- =========================
+-- View: vw_apontamentos_detalhados
+-- =========================
+CREATE OR REPLACE VIEW vw_apontamentos_detalhados AS
+SELECT 
+    a.id_apontamento,
+    a.data_apontamento,
+    u.matricula,
+    u.nome_completo_usuario,
+    CAST(AES_DECRYPT(u.email_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as email_usuario,
+    p.id_projeto,
+    p.nome_projeto,
+    a.ocorrencia_apontamento,
+    a.justificativa_apontamento,
+    a.hora_inicio_apontamento,
+    a.hora_fim_apontamento,
+    a.horas_totais_apontamento,
+    a.motivo_apontamento,
+    ed.nome_estado_dado as estado_apontamento
+FROM apontamentos a
+JOIN usuarios u ON a.usuarios_matricula = u.matricula
+LEFT JOIN projetos p ON a.id_projeto = p.id_projeto
+JOIN estado_dados ed ON a.id_estado_dado = ed.id_estado_dado;
+
+-- =========================
+-- View: vw_custos_projetos
+-- =========================
+CREATE OR REPLACE VIEW vw_custos_projetos AS
+SELECT 
     p.id_projeto,
     p.nome_projeto,
     u.matricula,
     u.nome_completo_usuario,
-    aup.horas_planejadas;
-
-
--- [TESTE] View tabela de colaboradores por projeto
-SELECT nome_colaborador, indice_cumprimento, indice_excedente, taxa_erro_apontamento
-FROM vw_indicadores_jornada
-WHERE id_projeto = 'PROJ01';
-
--- View Custo Estimado Laboral
-CREATE OR REPLACE VIEW vw_custo_estimado_laboral AS
-SELECT 
-    p.id_projeto,
-    p.nome_projeto,
-    SUM(aup.horas_planejadas * ace.valor_hora) AS custo_estimado_laboral
+    CAST(AES_DECRYPT(ace.valor_hora_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as valor_hora,
+    aup.horas_planejadas,
+    (CAST(AES_DECRYPT(ace.valor_hora_criptografado, 'timesync_chave_criptografia_2025') AS DECIMAL(10,2)) * aup.horas_planejadas) as custo_total_planejado
 FROM assoc_usuario_projetos aup
-LEFT JOIN projetos p 
-    ON CAST(p.id_projeto AS CHAR) = CAST(aup.id_projeto AS CHAR)
-LEFT JOIN assoc_cargo_equipe ace 
-    ON ace.usuarios_matricula = aup.usuarios_matricula
-GROUP BY p.id_projeto, p.nome_projeto;
+JOIN usuarios u ON aup.usuarios_matricula = u.matricula
+JOIN projetos p ON aup.id_projeto = p.id_projeto
+JOIN assoc_cargo_equipe ace ON u.matricula = ace.usuarios_matricula;
 
--- View Custo Estimado Laboral
-CREATE OR REPLACE VIEW vw_custo_estimado_laboral AS
+-- =========================
+-- View: vw_horas_trabalhadas
+-- =========================
+CREATE OR REPLACE VIEW vw_horas_trabalhadas AS
 SELECT 
+    u.matricula,
+    u.nome_completo_usuario,
+    CAST(AES_DECRYPT(u.email_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as email_usuario,
     p.id_projeto,
     p.nome_projeto,
-    SUM(aup.horas_planejadas * ace.valor_hora) AS custo_estimado_laboral
-FROM assoc_usuario_projetos aup
-LEFT JOIN projetos p 
-    ON CAST(p.id_projeto AS CHAR) = CAST(aup.id_projeto AS CHAR)
-LEFT JOIN assoc_cargo_equipe ace 
-    ON ace.usuarios_matricula = aup.usuarios_matricula
-GROUP BY p.id_projeto, p.nome_projeto;
-
--- View Custo Real Laboral
-CREATE OR REPLACE VIEW vw_custo_real_laboral AS
-SELECT 
-    p.id_projeto,
-    p.nome_projeto,
-    SUM(a.horas_totais_apontamento * ace.valor_hora) AS custo_real_laboral
+    SUM(a.horas_totais_apontamento) as total_horas_trabalhadas,
+    COUNT(a.id_apontamento) as total_apontamentos
 FROM apontamentos a
-LEFT JOIN projetos p 
-    ON CAST(p.id_projeto AS CHAR) = CAST(a.id_projeto AS CHAR)
-LEFT JOIN usuarios u 
-    ON a.usuarios_matricula = u.matricula
-LEFT JOIN assoc_cargo_equipe ace 
-    ON ace.usuarios_matricula = u.matricula
-GROUP BY p.id_projeto, p.nome_projeto;
+JOIN usuarios u ON a.usuarios_matricula = u.matricula
+LEFT JOIN projetos p ON a.id_projeto = p.id_projeto
+GROUP BY u.matricula, u.nome_completo_usuario, p.id_projeto, p.nome_projeto;
 
+-- =========================
+-- View: vw_equipe_hierarquia
+-- =========================
+CREATE OR REPLACE VIEW vw_equipe_hierarquia AS
+SELECT 
+    sup.matricula as matricula_superior,
+    sup.nome_completo_usuario as nome_superior,
+    CAST(AES_DECRYPT(sup.email_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as email_superior,
+    u.matricula as matricula_subordinado,
+    u.nome_completo_usuario as nome_subordinado,
+    CAST(AES_DECRYPT(u.email_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as email_subordinado,
+    cu.titulo_cargo_usuario,
+    CAST(AES_DECRYPT(ace.valor_hora_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as valor_hora
+FROM usuarios u
+JOIN usuarios sup ON u.matricula_superior = sup.matricula
+JOIN assoc_cargo_equipe ace ON u.matricula = ace.usuarios_matricula
+JOIN cargo_usuario cu ON ace.cargo_usuario_id_cargo_usuario = cu.id_cargo_usuario
+WHERE u.id_estado_dado = (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo');
+
+-- =========================
+-- View: vw_resumo_projeto
+-- =========================
+CREATE OR REPLACE VIEW vw_resumo_projeto AS
 SELECT 
     p.id_projeto,
     p.nome_projeto,
-    SUM(a.horas_totais_apontamento)
-FROM apontamentos a
-LEFT JOIN projetos p 
-    ON p.id_projeto = a.id_projeto
-LEFT JOIN usuarios u 
-    ON a.usuarios_matricula = u.matricula
-LEFT JOIN assoc_cargo_equipe ace 
-    ON ace.usuarios_matricula = u.matricula
-GROUP BY p.id_projeto, p.nome_projeto;
-
--- View Prazo de entrega
-CREATE OR REPLACE VIEW vw_prazo_entrega_projeto AS
-SELECT 
-    id_projeto,
-    nome_projeto,
-    data_entrega_projeto AS prazo_entrega
-FROM projetos;
-
--- [TESTE] View Custo Estimado e Real Laboral + Prazo de entrega
-SELECT 
-    e.id_projeto,
-    e.nome_projeto,
-    e.custo_estimado_laboral,
-    r.custo_real_laboral,
-    p.prazo_entrega
-FROM vw_custo_estimado_laboral e
-LEFT JOIN vw_custo_real_laboral r ON e.id_projeto = r.id_projeto
-LEFT JOIN vw_prazo_entrega_projeto p ON e.id_projeto = p.id_projeto;
-
--- View Horas Planejadas
-CREATE OR REPLACE VIEW vw_horas_planejadas AS
-SELECT 
-    p.id_projeto,
-    p.nome_projeto,
-    SUM(aup.horas_planejadas) AS horas_planejadas
-FROM assoc_usuario_projetos aup
-LEFT JOIN projetos p 
-    ON CAST(p.id_projeto AS CHAR) = CAST(aup.id_projeto AS CHAR)
-GROUP BY p.id_projeto, p.nome_projeto;
-
--- [TESTE] View Horas Planejadas
-SELECT * FROM vw_horas_planejadas WHERE id_projeto = 'PROJ01';
-
--- View Horas Apontadas
-CREATE OR REPLACE VIEW vw_horas_apontadas AS
-SELECT 
-    p.id_projeto,
-    p.nome_projeto,
-    SUM(a.horas_totais_apontamento) AS horas_apontadas
-FROM apontamentos a
-LEFT JOIN projetos p 
-    ON CAST(p.id_projeto AS CHAR) = CAST(a.id_projeto AS CHAR)
-GROUP BY p.id_projeto, p.nome_projeto;
-
--- [TESTE] View Horas Apontadas
-SELECT * FROM Timesync.vw_horas_apontadas WHERE id_projeto = 'PROJ01';
-
--- View Horas Extras Totais
-CREATE OR REPLACE VIEW vw_horas_extras_totais AS
-SELECT 
-    p.id_projeto,
-    p.nome_projeto,
-    SUM(a.horas_totais_apontamento) AS horas_extras_totais
-FROM apontamentos a
-LEFT JOIN projetos p 
-    ON CAST(p.id_projeto AS CHAR) = CAST(a.id_projeto AS CHAR)
-WHERE a.motivo_apontamento = 'Hora Extra'
-GROUP BY p.id_projeto, p.nome_projeto;
-
--- [TESTE] View Horas Extras Totais
-SELECT * FROM vw_horas_extras_totais WHERE id_projeto = 'PROJ01';
-
--- View Horas Extras Totais
-CREATE OR REPLACE VIEW vw_horas_retroativas AS
-SELECT 
-    p.id_projeto,
-    p.nome_projeto,
-    SUM(a.horas_totais_apontamento) AS horas_retroativas
-FROM apontamentos a
-LEFT JOIN projetos p 
-    ON CAST(p.id_projeto AS CHAR) = CAST(a.id_projeto AS CHAR)
-WHERE a.motivo_apontamento = 'Retroativo'
-GROUP BY p.id_projeto, p.nome_projeto;
-
--- [TESTE] View Horas Extras Totais
-SELECT * FROM vw_horas_retroativas WHERE id_projeto = 'PROJ01';
-
--- Tela de Equipe
--- View de Custo por categoria profissional
-CREATE OR REPLACE VIEW vw_custos_cargos_equipe AS
-SELECT 
-    c.id_cargo_usuario,
-    c.titulo_cargo_usuario AS categoria,
-    ace.valor_hora AS custo_hora_trabalho
-FROM cargo_usuario c
-LEFT JOIN assoc_cargo_equipe ace 
-    ON ace.cargo_usuario_id_cargo_usuario = c.id_cargo_usuario
-ORDER BY c.id_cargo_usuario;
-
--- [TESTE] View de Custo por categoria profissional
-SELECT * FROM vw_custos_cargos_equipe;
-
--- View de Distribuição de projetos 
-CREATE OR REPLACE VIEW vw_resumo_projetos_equipe AS
-SELECT 
-    p.id_projeto,
-    p.nome_projeto,
-    ROUND(SUM(aup.horas_planejadas * ace.valor_hora), 2) AS custo_estimado_laboral,
-    SUM(aup.horas_planejadas) AS horas_planejadas,
-    DATE_FORMAT(p.data_entrega_projeto, '%d/%m') AS data_entrega,
-    DATE_FORMAT(p.data_inicio_projeto, '%d/%m') AS data_inicio
-FROM projetos p
-LEFT JOIN assoc_usuario_projetos aup 
-    ON CAST(aup.id_projeto AS CHAR) = CAST(p.id_projeto AS CHAR)
-LEFT JOIN assoc_cargo_equipe ace 
-    ON ace.usuarios_matricula = aup.usuarios_matricula
-GROUP BY 
-    p.id_projeto,
-    p.nome_projeto,
+    p.data_inicio_projeto,
     p.data_entrega_projeto,
-    p.data_inicio_projeto
-ORDER BY p.id_projeto;
+    COUNT(DISTINCT aup.usuarios_matricula) as total_colaboradores,
+    SUM(aup.horas_planejadas) as total_horas_planejadas,
+    SUM(a.horas_totais_apontamento) as total_horas_executadas,
+    ed.nome_estado_dado as estado_projeto
+FROM projetos p
+LEFT JOIN assoc_usuario_projetos aup ON p.id_projeto = aup.id_projeto
+LEFT JOIN apontamentos a ON p.id_projeto = a.id_projeto
+JOIN estado_dados ed ON p.id_estado_dado = ed.id_estado_dado
+GROUP BY p.id_projeto, p.nome_projeto, p.data_inicio_projeto, p.data_entrega_projeto, ed.nome_estado_dado;
 
--- [TESTE] View de Distribuição de projetos 
-SELECT * FROM vw_resumo_projetos_equipe;
+-- =========================
+-- View: vw_dados_criptografia_teste
+-- =========================
+CREATE OR REPLACE VIEW vw_dados_criptografia_teste AS
+SELECT 
+    'usuarios' as tabela,
+    matricula,
+    nome_completo_usuario,
+    CAST(AES_DECRYPT(email_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as email_decrypt,
+    CAST(AES_DECRYPT(id_microsoft_usuario_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as id_microsoft_decrypt
+FROM usuarios
+UNION ALL
+SELECT 
+    'assoc_cargo_equipe' as tabela,
+    usuarios_matricula as matricula,
+    '' as nome_completo_usuario,
+    '' as email_decrypt,
+    CAST(AES_DECRYPT(valor_hora_criptografado, 'timesync_chave_criptografia_2025') AS CHAR) as id_microsoft_decrypt
+FROM assoc_cargo_equipe;
+
+-- =========================
+-- View: vw_verificacao_criptografia
+-- =========================
+CREATE OR REPLACE VIEW vw_verificacao_criptografia AS
+SELECT 
+    u.matricula,
+    u.nome_completo_usuario,
+    -- Verifica se a descriptografia funciona
+    CASE 
+        WHEN AES_DECRYPT(u.email_usuario_criptografado, 'timesync_chave_criptografia_2025') IS NOT NULL 
+        THEN 'OK' 
+        ELSE 'ERRO' 
+    END as status_email,
+    CASE 
+        WHEN AES_DECRYPT(u.id_microsoft_usuario_criptografado, 'timesync_chave_criptografia_2025') IS NOT NULL 
+        THEN 'OK' 
+        ELSE 'ERRO' 
+    END as status_microsoft,
+    CASE 
+        WHEN AES_DECRYPT(ace.valor_hora_criptografado, 'timesync_chave_criptografia_2025') IS NOT NULL 
+        THEN 'OK' 
+        ELSE 'ERRO' 
+    END as status_valor_hora
+FROM usuarios u
+LEFT JOIN assoc_cargo_equipe ace ON u.matricula = ace.usuarios_matricula;
