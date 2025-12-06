@@ -23,9 +23,6 @@ SELECT
 FROM assoc_usuario_projetos aup
 LEFT JOIN usuarios u ON CAST(u.matricula AS CHAR) = CAST(aup.usuarios_matricula AS CHAR)
 LEFT JOIN projetos p ON CAST(p.id_projeto AS CHAR) = CAST(aup.id_projeto AS CHAR);
-    
--- [TESTE] View de Distribuição de esforço entre colaboradores por projeto
-SELECT * FROM vw_distribuicao_esforco;
 
 -- View tabela de colaboradores por projeto
 CREATE OR REPLACE VIEW vw_indicadores_jornada AS
@@ -56,12 +53,6 @@ GROUP BY
     u.matricula,
     u.nome_completo_usuario,
     aup.horas_planejadas;
-
-
--- [TESTE] View tabela de colaboradores por projeto
-SELECT nome_colaborador, indice_cumprimento, indice_excedente, taxa_erro_apontamento
-FROM vw_indicadores_jornada
-WHERE id_projeto = 'PROJ01';
 
 -- View Custo Estimado Laboral
 CREATE OR REPLACE VIEW vw_custo_estimado_laboral AS
@@ -125,17 +116,6 @@ SELECT
     data_entrega_projeto AS prazo_entrega
 FROM projetos;
 
--- [TESTE] View Custo Estimado e Real Laboral + Prazo de entrega
-SELECT 
-    e.id_projeto,
-    e.nome_projeto,
-    e.custo_estimado_laboral,
-    r.custo_real_laboral,
-    p.prazo_entrega
-FROM vw_custo_estimado_laboral e
-LEFT JOIN vw_custo_real_laboral r ON e.id_projeto = r.id_projeto
-LEFT JOIN vw_prazo_entrega_projeto p ON e.id_projeto = p.id_projeto;
-
 -- View Horas Planejadas
 CREATE OR REPLACE VIEW vw_horas_planejadas AS
 SELECT 
@@ -147,9 +127,6 @@ LEFT JOIN projetos p
     ON CAST(p.id_projeto AS CHAR) = CAST(aup.id_projeto AS CHAR)
 GROUP BY p.id_projeto, p.nome_projeto;
 
--- [TESTE] View Horas Planejadas
-SELECT * FROM vw_horas_planejadas WHERE id_projeto = 'PROJ01';
-
 -- View Horas Apontadas
 CREATE OR REPLACE VIEW vw_horas_apontadas AS
 SELECT 
@@ -160,9 +137,6 @@ FROM apontamentos a
 LEFT JOIN projetos p 
     ON CAST(p.id_projeto AS CHAR) = CAST(a.id_projeto AS CHAR)
 GROUP BY p.id_projeto, p.nome_projeto;
-
--- [TESTE] View Horas Apontadas
-SELECT * FROM Timesync.vw_horas_apontadas WHERE id_projeto = 'PROJ01';
 
 -- View Horas Extras Totais
 CREATE OR REPLACE VIEW vw_horas_extras_totais AS
@@ -176,9 +150,6 @@ LEFT JOIN projetos p
 WHERE a.motivo_apontamento = 'Hora Extra'
 GROUP BY p.id_projeto, p.nome_projeto;
 
--- [TESTE] View Horas Extras Totais
-SELECT * FROM vw_horas_extras_totais WHERE id_projeto = 'PROJ01';
-
 -- View Horas Extras Totais
 CREATE OR REPLACE VIEW vw_horas_retroativas AS
 SELECT 
@@ -191,9 +162,6 @@ LEFT JOIN projetos p
 WHERE a.motivo_apontamento = 'Retroativo'
 GROUP BY p.id_projeto, p.nome_projeto;
 
--- [TESTE] View Horas Extras Totais
-SELECT * FROM vw_horas_retroativas WHERE id_projeto = 'PROJ01';
-
 -- Tela de Equipe
 -- View de Custo por categoria profissional
 CREATE OR REPLACE VIEW vw_custos_cargos_equipe AS
@@ -205,9 +173,6 @@ FROM cargo_usuario c
 LEFT JOIN assoc_cargo_equipe ace 
     ON ace.cargo_usuario_id_cargo_usuario = c.id_cargo_usuario
 ORDER BY c.id_cargo_usuario;
-
--- [TESTE] View de Custo por categoria profissional
-SELECT * FROM vw_custos_cargos_equipe;
 
 -- View de Distribuição de projetos 
 CREATE OR REPLACE VIEW vw_resumo_projetos_equipe AS
@@ -230,5 +195,191 @@ GROUP BY
     p.data_inicio_projeto
 ORDER BY p.id_projeto;
 
--- [TESTE] View de Distribuição de projetos 
-SELECT * FROM vw_resumo_projetos_equipe;
+-- ===============================
+-- VIEW 1: RELATÓRIO DE PROJETOS
+-- ===============================
+CREATE OR REPLACE VIEW vw_relatorio_projeto AS
+SELECT 
+    p.id_projeto AS ticket,
+    p.nome_projeto AS nome_projeto,
+    (SELECT u.nome_completo_usuario 
+     FROM assoc_usuario_projetos aup2 
+     JOIN usuarios u ON u.matricula = aup2.usuarios_matricula 
+     WHERE aup2.id_projeto = p.id_projeto 
+     LIMIT 1) AS gestor_responsavel,
+    DATE_FORMAT(p.data_inicio_projeto, '%d/%m/%Y') AS data_inicio,
+    DATE_FORMAT(p.data_entrega_projeto, '%d/%m/%Y') AS data_entrega,
+    CASE 
+        -- Se a data atual for ANTES da data de início: Não iniciado
+        WHEN CURDATE() < p.data_inicio_projeto THEN 'Não iniciado'
+        -- Se a data atual for DEPOIS da data de entrega: Concluído
+        WHEN CURDATE() > p.data_entrega_projeto THEN 'Concluído'
+        -- Se a data atual estiver ENTRE a data de início e data de entrega: Em andamento
+        WHEN CURDATE() >= p.data_inicio_projeto AND CURDATE() <= p.data_entrega_projeto THEN 'Em andamento'
+        -- Caso as datas sejam nulas ou inválidas
+        ELSE 'Indefinido'
+    END AS status,
+    COALESCE(SUM(aup.horas_planejadas), 0) AS horas_planejadas,
+    COALESCE(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 0) AS horas_apontadas_no_mes,
+    GREATEST(
+        COALESCE(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 0) - 
+        COALESCE(SUM(aup.horas_planejadas), 0),
+        0
+    ) AS horas_extras,
+    COALESCE(SUM(aup.horas_planejadas * ac.valor_hora), 0) AS custo_estimado_laboral,
+    COALESCE(SUM(TIME_TO_SEC(a.horas_totais_apontamento)/3600 * ac.valor_hora), 0) AS custo_real_laboral,
+    COALESCE(
+        ROUND(
+            (COALESCE(SUM(TIME_TO_SEC(a.horas_totais_apontamento)/3600 * ac.valor_hora), 0) - 
+             COALESCE(SUM(aup.horas_planejadas * ac.valor_hora), 0))
+            / NULLIF(COALESCE(SUM(aup.horas_planejadas * ac.valor_hora), 0), 0) * 100
+        ,1),
+        0
+    ) AS diferenca_percentual
+FROM projetos p
+LEFT JOIN assoc_usuario_projetos aup ON aup.id_projeto = p.id_projeto
+LEFT JOIN apontamentos a ON a.id_projeto = p.id_projeto 
+    AND a.usuarios_matricula = aup.usuarios_matricula
+    -- Remove o filtro de datas do projeto para considerar apontamentos do mês atual independente
+    -- AND a.data_apontamento BETWEEN p.data_inicio_projeto AND p.data_entrega_projeto
+    AND MONTH(a.data_apontamento) = MONTH(CURDATE())
+    AND YEAR(a.data_apontamento) = YEAR(CURDATE())
+LEFT JOIN assoc_cargo_equipe ac ON ac.usuarios_matricula = aup.usuarios_matricula
+GROUP BY p.id_projeto, p.nome_projeto, p.data_inicio_projeto, p.data_entrega_projeto;
+
+
+-- ===============================
+-- VIEW 2: ALOCAÇÃO DE RECURSOS
+-- ===============================
+CREATE OR REPLACE VIEW vw_alocacao_recursos AS
+SELECT 
+    u.nome_completo_usuario AS colaborador,
+    cu.titulo_cargo_usuario AS cargo,
+    ac.valor_hora AS custo_hora,
+    aup.horas_planejadas,
+    COALESCE(ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 1), 0) AS horas_apontadas,
+    GREATEST(
+        COALESCE(ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 1), 0) - 
+        aup.horas_planejadas,
+        0
+    ) AS horas_extras,
+    COALESCE(
+        ROUND(
+            COALESCE(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 0) / 
+            NULLIF(aup.horas_planejadas, 0) * 100, 
+        1),
+        0
+    ) AS indice_jornada,
+    ROUND(
+        aup.horas_planejadas / 
+        NULLIF(
+            (SELECT SUM(horas_planejadas) 
+             FROM assoc_usuario_projetos aup2 
+             WHERE aup2.id_projeto = aup.id_projeto), 
+        0) * 100, 
+    1) AS participacao,
+    COALESCE(
+        ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600 * ac.valor_hora, 2), 
+        0
+    ) AS custo_total,
+    aup.id_projeto
+FROM assoc_usuario_projetos aup
+JOIN usuarios u ON u.matricula = aup.usuarios_matricula
+JOIN assoc_cargo_equipe ac ON ac.usuarios_matricula = u.matricula
+JOIN cargo_usuario cu ON cu.id_cargo_usuario = ac.cargo_usuario_id_cargo_usuario
+LEFT JOIN apontamentos a ON a.id_projeto = aup.id_projeto 
+    AND a.usuarios_matricula = u.matricula
+    AND MONTH(a.data_apontamento) = MONTH(CURDATE())
+    AND YEAR(a.data_apontamento) = YEAR(CURDATE())
+GROUP BY u.nome_completo_usuario, cu.titulo_cargo_usuario, ac.valor_hora, 
+         aup.horas_planejadas, aup.id_projeto, aup.usuarios_matricula;
+
+
+-- ===============================
+-- VIEW 3: INDICADORES DE EFICIÊNCIA
+-- ===============================
+CREATE OR REPLACE VIEW vw_indicadores_eficiencia AS
+SELECT 
+    p.id_projeto,
+    COALESCE(
+        SUM(
+            GREATEST(
+                TIME_TO_SEC(a.horas_totais_apontamento)/3600 - aup.horas_planejadas,
+                0
+            )
+        ), 
+        0
+    ) AS horas_extras_totais,
+    COALESCE(
+        ROUND(
+            (COALESCE(SUM(TIME_TO_SEC(a.horas_totais_apontamento)/3600 * ac.valor_hora), 0) - 
+             COALESCE(SUM(aup.horas_planejadas * ac.valor_hora), 0))
+            / NULLIF(COALESCE(SUM(aup.horas_planejadas * ac.valor_hora), 0), 0) * 100
+        ,1),
+        0
+    ) AS custo_real_vs_estimado_percent,
+    COALESCE(
+        ROUND(
+            COALESCE(SUM(aup.horas_planejadas), 0) / 
+            NULLIF(COALESCE(SUM(TIME_TO_SEC(a.horas_totais_apontamento)/3600), 0), 0) * 100, 
+        1),
+        100
+    ) AS taxa_aderencia_planejamento
+FROM projetos p
+LEFT JOIN assoc_usuario_projetos aup ON aup.id_projeto = p.id_projeto
+LEFT JOIN apontamentos a ON a.id_projeto = p.id_projeto 
+    AND a.usuarios_matricula = aup.usuarios_matricula
+LEFT JOIN assoc_cargo_equipe ac ON ac.usuarios_matricula = aup.usuarios_matricula
+GROUP BY p.id_projeto;
+
+
+-- ===============================
+-- VIEW 4: COMPARATIVO MENSAL
+-- ===============================
+CREATE OR REPLACE VIEW vw_comparativo_mensal AS
+SELECT 
+    p.id_projeto,
+    DATE_FORMAT(CURDATE(), '%M') AS mes,
+    COALESCE(SUM(aup.horas_planejadas), 0) AS horas_planejadas,
+    COALESCE(ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 1), 0) AS horas_apontadas,
+    GREATEST(
+        COALESCE(ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 1), 0) - 
+        COALESCE(SUM(aup.horas_planejadas), 0),
+        0
+    ) AS horas_extras,
+    COALESCE(ROUND(SUM(aup.horas_planejadas * ac.valor_hora), 2), 0) AS custo_estimado,
+    COALESCE(ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento)/3600 * ac.valor_hora), 2), 0) AS custo_real,
+    COALESCE(
+        ROUND(
+            (COALESCE(SUM(TIME_TO_SEC(a.horas_totais_apontamento)/3600 * ac.valor_hora), 0) - 
+             COALESCE(SUM(aup.horas_planejadas * ac.valor_hora), 0))
+            / NULLIF(COALESCE(SUM(aup.horas_planejadas * ac.valor_hora), 0), 0) * 100
+        ,1),
+        0
+    ) AS desvio_percentual
+FROM projetos p
+LEFT JOIN assoc_usuario_projetos aup ON aup.id_projeto = p.id_projeto
+LEFT JOIN apontamentos a ON a.id_projeto = p.id_projeto 
+    AND a.usuarios_matricula = aup.usuarios_matricula
+    AND MONTH(a.data_apontamento) = MONTH(CURDATE())
+    AND YEAR(a.data_apontamento) = YEAR(CURDATE())
+LEFT JOIN assoc_cargo_equipe ac ON ac.usuarios_matricula = aup.usuarios_matricula
+GROUP BY p.id_projeto
+ORDER BY p.id_projeto;
+
+
+-- ===============================
+-- VIEW 5: OBSERVAÇÕES AUTOMÁTICAS
+-- ===============================
+CREATE OR REPLACE VIEW vw_observacoes_automaticas AS
+SELECT 
+    'Custo real > estimado em 10%' AS situacao,
+    'O projeto está acima do custo previsto para o mês em questão' AS mensagem
+UNION ALL
+SELECT 
+    'Taxa de erro > 5%',
+    'Existem inconsistências nos apontamentos. Avaliar colaboradores com maior índice de erro.'
+UNION ALL
+SELECT 
+    'Aderência < 85%',
+    'O cronograma de horas está abaixo do esperado. Risco de atraso detectado.';
