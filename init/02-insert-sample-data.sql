@@ -23,18 +23,18 @@ INSERT INTO cargo_usuario (id_cargo_usuario, titulo_cargo_usuario) VALUES
 -- Inserir dados na tabela usuarios (baseado no documento)
 -- =========================
 INSERT INTO usuarios (
-    matricula, nome_completo_usuario, email_usuario, id_microsoft_usuario, 
+    matricula, nome_completo_usuario, email_usuario, senha_usuario, id_microsoft_usuario, 
     data_criacao_usuario, data_atualizacao_usuario, id_estado_dado, matricula_superior
 ) VALUES
-(509880, 'Giovanna AAvila', 'giovanna.aavila@empresa.com', 'giovanna.aavila_empresa.com#EXT#', NOW(), NOW(), 
+(509880, 'Giovanna AAvila', 'giovanna.aavila@empresa.com', '123Aa321','giovanna.aavila_empresa.com#EXT#', NOW(), NOW(), 
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), NULL),
-(509881, 'Carlos Silva', 'carlos.silva@empresa.com', 'carlos.silva_empresa.com#EXT#', NOW(), NOW(), 
+(509881, 'Carlos Silva', 'carlos.silva@empresa.com', '123Aa321','carlos.silva_empresa.com#EXT#', NOW(), NOW(), 
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 509880),
-(509882, 'Ana Rodrigues', 'ana.rodrigues@empresa.com', 'ana.rodrigues_empresa.com#EXT#', NOW(), NOW(), 
+(509882, 'Ana Rodrigues', 'ana.rodrigues@empresa.com', '123Aa321','ana.rodrigues_empresa.com#EXT#', NOW(), NOW(), 
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 509880),
-(509883, 'Pedro Santos', 'pedro.santos@empresa.com', 'pedro.santos_empresa.com#EXT#', NOW(), NOW(), 
+(509883, 'Pedro Santos', 'pedro.santos@empresa.com', '123Aa321','pedro.santos_empresa.com#EXT#', NOW(), NOW(), 
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 509880),
-(509884, 'Mariana Lima', 'mariana.lima@empresa.com', 'mariana.lima_empresa.com#EXT#', NOW(), NOW(), 
+(509884, 'Mariana Lima', 'mariana.lima@empresa.com', '123Aa321','mariana.lima_empresa.com#EXT#', NOW(), NOW(), 
  (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1), 509880);
 
 -- =========================

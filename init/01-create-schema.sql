@@ -24,6 +24,7 @@ CREATE TABLE usuarios (
     matricula INT PRIMARY KEY,
     nome_completo_usuario VARCHAR(100) NOT NULL,
     email_usuario VARCHAR(150) NOT NULL,
+    senha_usuario VARCHAR(40) NOT NULL,
     id_microsoft_usuario VARCHAR(255),
     data_criacao_usuario DATETIME NOT NULL,
     data_atualizacao_usuario DATETIME NOT NULL,
