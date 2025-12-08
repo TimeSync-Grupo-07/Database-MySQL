@@ -386,3 +386,42 @@ LEFT JOIN apontamentos a ON a.id_projeto = p.id_projeto
     AND a.usuarios_matricula = aup.usuarios_matricula
 LEFT JOIN assoc_cargo_equipe ac ON ac.usuarios_matricula = aup.usuarios_matricula
 GROUP BY p.id_projeto;
+
+CREATE VIEW vw_informacoes_calculo AS
+WITH
+-- ============================
+-- Soma de horas planejadas
+-- ============================
+cte_planejado AS (
+    SELECT
+        usuarios_matricula,
+        CAST(ROUND(SUM(horas_planejadas), 1) AS DOUBLE) AS total_planejado
+    FROM assoc_usuario_projetos
+    GROUP BY usuarios_matricula
+),
+
+-- ============================
+-- Soma de horas apontadas
+-- ============================
+cte_apontado AS (
+    SELECT
+        usuarios_matricula,
+        CAST(ROUND(SUM(horas_totais_apontamento), 1) AS DOUBLE) AS total_apontado
+    FROM apontamentos
+    GROUP BY usuarios_matricula
+)
+
+SELECT
+    u.matricula,
+    CAST(ace.valor_hora AS DOUBLE) AS valor_hora_colaborador,
+    COALESCE(cp.total_planejado, 0.0) AS horas_planejadas_totais,
+    COALESCE(ca.total_apontado, 0.0) AS horas_apontadas_totais
+
+FROM usuarios u
+LEFT JOIN assoc_cargo_equipe ace
+    ON ace.usuarios_matricula = u.matricula
+LEFT JOIN cte_planejado cp
+    ON cp.usuarios_matricula = u.matricula
+LEFT JOIN cte_apontado ca
+    ON ca.usuarios_matricula = u.matricula;
+GROUP BY p.id_projeto;
