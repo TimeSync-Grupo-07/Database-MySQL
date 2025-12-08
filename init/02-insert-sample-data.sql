@@ -137,4 +137,69 @@ INSERT INTO apontamentos (
 -- Dias 07-15/08/2025 - Padrão normal
 (UUID_TO_BIN(UUID()), '2025-08-07', 'Relógio Web', NULL, NULL, '08:00:00', '12:22:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
 (UUID_TO_BIN(UUID()), '2025-08-07', 'Relógio Web', NULL, NULL, '13:22:00', '17:00:00', NULL, 'Trabalho normal', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
-(UUID_TO_BIN(UUID()), '2025-08-07', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1));
+(UUID_TO_BIN(UUID()), '2025-08-07', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880, (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+-- 16/08/2025 – Sábado Compensado
+(UUID_TO_BIN(UUID()), '2025-08-16', 'Compensado', NULL, NULL, NULL, NULL, 0, 'Folga', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 17/08/2025 – Domingo Compensado
+(UUID_TO_BIN(UUID()), '2025-08-17', 'Compensado', NULL, NULL, NULL, NULL, 0, 'Folga', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 18/08/2025 – Dia normal com marcação manual parcial
+(UUID_TO_BIN(UUID()), '2025-08-18', 'Relógio Web', NULL, NULL, '08:05:00', '12:00:00', NULL, 'Trabalho normal', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-18', 'Marcação Manual', NULL, NULL, '13:00:00', '17:02:00', NULL, 'Ajuste manual', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-18', 'Horas Projeto', 'ITAU - PROJETOS RPA', 'PC.037', NULL, NULL, 8, 'Projeto alocado', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 19/08/2025 – Dia normal + hora extra
+(UUID_TO_BIN(UUID()), '2025-08-19', 'Relógio Web', NULL, NULL, '07:58:00', '12:00:00', NULL, 'Trabalho normal', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-19', 'Relógio Web', NULL, NULL, '13:00:00', '18:00:00', NULL, 'Trabalho normal', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-19', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-19', 'Hora extra', '14 - Hora extra', NULL, NULL, NULL, 1.5, 'Hora extra justificada', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 20/08/2025 – Apenas jornada normal
+(UUID_TO_BIN(UUID()), '2025-08-20', 'Relógio Web', NULL, NULL, '08:00:00', '12:10:00', NULL, 'Trabalho normal', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-20', 'Relógio Web', NULL, NULL, '13:10:00', '17:00:00', NULL, 'Trabalho normal', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-20', 'Horas Projeto', 'ITAU - PROJETOS RPA', 'PC.037', NULL, NULL, 8, 'Projeto alocado', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 21/08/2025 – Marcação retroativa
+(UUID_TO_BIN(UUID()), '2025-08-21', 'Marcação Manual', NULL, NULL, '08:10:00', '12:00:00', NULL, 'Retroativo', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-21', 'Relógio Web', NULL, NULL, '13:00:00', '16:55:00', NULL, 'Trabalho normal', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-21', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 22/08/2025 – Jornada curta + justificativa
+(UUID_TO_BIN(UUID()), '2025-08-22', 'Relógio Web', NULL, NULL, '08:00:00', '11:00:00', NULL, 'Saída antecipada', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-22', 'Horas Projeto', 'ITAU - PROJETOS RPA', 'PC.037', NULL, NULL, 4, 'Trabalho parcial', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 23/08/2025 – Sábado normal com projeto (excepcional)
+(UUID_TO_BIN(UUID()), '2025-08-23', 'Horas Projeto Extra', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 3, 'Execução extraordinária', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 24/08/2025 – Domingo folga
+(UUID_TO_BIN(UUID()), '2025-08-24', 'Compensado', NULL, NULL, NULL, NULL, 0, 'Folga', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+
+-- 25/08/2025 – Retorno com extra leve
+(UUID_TO_BIN(UUID()), '2025-08-25', 'Relógio Web', NULL, NULL, '08:00:00', '12:03:00', NULL, 'Trabalho normal', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-25', 'Relógio Web', NULL, NULL, '13:03:00', '17:45:00', NULL, 'Trabalho normal', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-25', 'Horas Programadas', 'BRADESCO - PROCESS MINING', 'PC.038', NULL, NULL, 8, 'Projeto alocado', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1)),
+(UUID_TO_BIN(UUID()), '2025-08-25', 'Hora extra', '14 - Hora extra', NULL, NULL, NULL, 0.75, 'Hora extra justificada', 509880,
+ (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado='Ativo' LIMIT 1));
