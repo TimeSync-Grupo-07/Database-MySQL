@@ -383,3 +383,21 @@ UNION ALL
 SELECT 
     'Aderência < 85%',
     'O cronograma de horas está abaixo do esperado. Risco de atraso detectado.';
+
+CREATE VIEW vw_informacoes_calculo AS
+SELECT
+    u.matricula AS matricula,
+    CAST(ace.valor_hora AS DOUBLE) AS valor_hora_colaborador,
+    CAST(ROUND(COALESCE(SUM(DISTINCT aup.horas_planejadas), 0), 1) AS DOUBLE) AS horas_planejadas_totais,
+    CAST(ROUND(COALESCE(SUM(a.horas_totais_apontamento), 0), 1) AS DOUBLE) AS horas_apontadas_totais
+FROM usuarios u
+LEFT JOIN assoc_cargo_equipe ace
+    ON ace.usuarios_matricula = u.matricula
+LEFT JOIN assoc_usuario_projetos aup
+    ON aup.usuarios_matricula = u.matricula
+LEFT JOIN apontamentos a
+    ON a.usuarios_matricula = u.matricula
+GROUP BY
+    u.matricula,
+    u.nome_completo_usuario,
+    ace.valor_hora;
