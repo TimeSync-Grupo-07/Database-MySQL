@@ -385,19 +385,39 @@ SELECT
     'O cronograma de horas está abaixo do esperado. Risco de atraso detectado.';
 
 CREATE VIEW vw_informacoes_calculo AS
+WITH
+-- ============================
+-- Soma de horas planejadas
+-- ============================
+cte_planejado AS (
+    SELECT
+        usuarios_matricula,
+        CAST(ROUND(SUM(horas_planejadas), 1) AS DOUBLE) AS total_planejado
+    FROM assoc_usuario_projetos
+    GROUP BY usuarios_matricula
+),
+
+-- ============================
+-- Soma de horas apontadas
+-- ============================
+cte_apontado AS (
+    SELECT
+        usuarios_matricula,
+        CAST(ROUND(SUM(horas_totais_apontamento), 1) AS DOUBLE) AS total_apontado
+    FROM apontamentos
+    GROUP BY usuarios_matricula
+)
+
 SELECT
-    u.matricula AS matricula,
+    u.matricula,
     CAST(ace.valor_hora AS DOUBLE) AS valor_hora_colaborador,
-    CAST(ROUND(COALESCE(SUM(DISTINCT aup.horas_planejadas), 0), 1) AS DOUBLE) AS horas_planejadas_totais,
-    CAST(ROUND(COALESCE(SUM(a.horas_totais_apontamento), 0), 1) AS DOUBLE) AS horas_apontadas_totais
+    COALESCE(cp.total_planejado, 0.0) AS horas_planejadas_totais,
+    COALESCE(ca.total_apontado, 0.0) AS horas_apontadas_totais
+
 FROM usuarios u
 LEFT JOIN assoc_cargo_equipe ace
     ON ace.usuarios_matricula = u.matricula
-LEFT JOIN assoc_usuario_projetos aup
-    ON aup.usuarios_matricula = u.matricula
-LEFT JOIN apontamentos a
-    ON a.usuarios_matricula = u.matricula
-GROUP BY
-    u.matricula,
-    u.nome_completo_usuario,
-    ace.valor_hora;
+LEFT JOIN cte_planejado cp
+    ON cp.usuarios_matricula = u.matricula
+LEFT JOIN cte_apontado ca
+    ON ca.usuarios_matricula = u.matricula;
