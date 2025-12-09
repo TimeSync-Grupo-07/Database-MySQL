@@ -404,7 +404,11 @@ LEFT JOIN assoc_cargo_equipe ac ON ac.usuarios_matricula = aup.usuarios_matricul
 GROUP BY p.id_projeto;
 
 
-CREATE VIEW vw_informacoes_calculo AS
+
+-- ============================================
+-- VIEW: Informações para Cálculo
+-- ============================================
+CREATE OR REPLACE VIEW vw_informacoes_calculo AS
 WITH
 -- ============================
 -- Soma de horas planejadas
@@ -430,15 +434,17 @@ cte_apontado AS (
 
 SELECT
     u.matricula,
+    u.nome_completo_usuario AS nome_colaborador,
     CAST(ace.valor_hora AS DOUBLE) AS valor_hora_colaborador,
     COALESCE(cp.total_planejado, 0.0) AS horas_planejadas_totais,
-    COALESCE(ca.total_apontado, 0.0) AS horas_apontadas_totais
-
+    COALESCE(ca.total_apontado, 0.0) AS horas_apontadas_totais,
+    ROUND(COALESCE(ca.total_apontado, 0.0) / NULLIF(COALESCE(cp.total_planejado, 0.0), 0) * 100, 2) AS percentual_conclusao
 FROM usuarios u
 LEFT JOIN assoc_cargo_equipe ace
     ON ace.usuarios_matricula = u.matricula
 LEFT JOIN cte_planejado cp
     ON cp.usuarios_matricula = u.matricula
 LEFT JOIN cte_apontado ca
-    ON ca.usuarios_matricula = u.matricula;
-GROUP BY p.id_projeto;
+    ON ca.usuarios_matricula = u.matricula
+WHERE u.id_estado_dado = (SELECT id_estado_dado FROM estado_dados WHERE nome_estado_dado = 'Ativo' LIMIT 1)
+ORDER BY u.matricula;
