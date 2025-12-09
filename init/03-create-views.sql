@@ -371,21 +371,38 @@ CREATE OR REPLACE VIEW vw_comparativo_mensal AS
 SELECT 
     p.id_projeto,
     DATE_FORMAT(CURDATE(), '%M') AS mes,
+
     COALESCE(SUM(aup.horas_planejadas), 0) AS horas_planejadas,
-    COALESCE(ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 1), 0) AS horas_apontadas,
+
+    COALESCE(
+        ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento)) / 3600, 1),
+        0
+    ) AS horas_apontadas,
+
     GREATEST(
         COALESCE(ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600, 1), 0) -
         COALESCE(SUM(aup.horas_planejadas), 0),
         0
     ) AS horas_extras,
-    COALESCE(ROUND(SUM(aup.horas_planejadas * ac.valor_hora), 2), 0) AS custo_estimado,
-    COALESCE(ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600 * ac.valor_hora, 2), 0) AS custo_real
+
+    COALESCE(
+        ROUND(SUM(aup.horas_planejadas * ac.valor_hora), 2),
+        0
+    ) AS custo_estimado,
+
+    COALESCE(
+        ROUND(SUM(TIME_TO_SEC(a.horas_totais_apontamento))/3600 * AVG(ac.valor_hora), 2),
+        0
+    ) AS custo_real
+
 FROM projetos p
 LEFT JOIN assoc_usuario_projetos aup ON aup.id_projeto = p.id_projeto
 LEFT JOIN apontamentos a ON a.id_projeto = p.id_projeto 
     AND a.usuarios_matricula = aup.usuarios_matricula
 LEFT JOIN assoc_cargo_equipe ac ON ac.usuarios_matricula = aup.usuarios_matricula
+
 GROUP BY p.id_projeto;
+
 
 CREATE VIEW vw_informacoes_calculo AS
 WITH
